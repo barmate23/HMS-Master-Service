@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        COMPOSE_FILE = "docker-compose.bookingservice.yml"
-        TARGET_SERVICE = "bookingservice"
-        TARGET_CONTAINER_NAME = "bookingservice"
-        TARGET_IMAGE_NAME = "bookingservice:latest"
+        COMPOSE_FILE = "docker-compose.masterservice.yml"
+        TARGET_SERVICE = "masterservice"
+        TARGET_CONTAINER_NAME = "masterservice"
+        TARGET_IMAGE_NAME = "masterservice:latest"
     }
 
     stages {
