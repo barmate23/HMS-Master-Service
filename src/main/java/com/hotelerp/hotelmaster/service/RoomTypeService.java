@@ -7,6 +7,6 @@ public interface RoomTypeService {
     StandardResponse<?> createRoomType(RoomTypeRequest request);
     StandardResponse<?> updateRoomType(Long id, RoomTypeRequest request);
     StandardResponse<?> getRoomTypeById(Long id);
-    StandardResponse<?> getAllRoomTypes();
+    StandardResponse<?> getAllRoomTypes(String searchText, Long hotelId, int page, int size);
     StandardResponse<?> deleteRoomType(Long id);
 }

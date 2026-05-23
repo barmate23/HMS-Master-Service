@@ -33,8 +33,11 @@ public class HotelController {
     }
 
     @GetMapping(ServiceConstants.GET_ALL_HOTELS)
-    public ResponseEntity<StandardResponse<?>> getAllHotels() {
-        return ResponseEntity.ok(service.getAllHotels());
+    public ResponseEntity<StandardResponse<?>> getAllHotels(
+            @RequestParam(required = false) String searchText,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(service.getAllHotels(searchText, page, size));
     }
 
     @DeleteMapping(ServiceConstants.DELETE_HOTEL)

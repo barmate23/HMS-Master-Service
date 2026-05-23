@@ -7,6 +7,9 @@ import com.hotelerp.hotelmaster.entity.Hotel;
 import com.hotelerp.hotelmaster.repository.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,14 +101,26 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional(readOnly = true)
-    public StandardResponse<?> getAllHotels() {
-        log.info("Fetching all hotels");
+    public StandardResponse<?> getAllHotels(String searchText, int page, int size) {
+        log.info("Fetching all hotels with searchText: {}, page: {}, size: {}", searchText, page, size);
         try {
-            List<Hotel> list = repository.findAll();
-            List<HotelResponse> responses = list.stream().map(this::mapToResponse).collect(Collectors.toList());
-            return StandardResponse.success(responses, "Hotels fetched successfully");
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Hotel> hotelPage = repository.searchHotels(searchText, pageable);
+            
+            List<HotelResponse> responses = hotelPage.getContent().stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList());
+
+            StandardResponse.ResponseMetadata metadata = StandardResponse.ResponseMetadata.builder()
+                    .totalRecords(hotelPage.getTotalElements())
+                    .currentPage(hotelPage.getNumber())
+                    .pageSize(hotelPage.getSize())
+                    .totalPages(hotelPage.getTotalPages())
+                    .build();
+
+            return StandardResponse.success(responses, "Hotels fetched successfully", metadata);
         } catch (Exception e) {
-            log.error("Error fetching all hotels: ", e);
+            log.error("Error fetching hotels: ", e);
             return StandardResponse.error("Failed to fetch hotels", "FETCH_ERROR", e.getMessage());
         }
     }

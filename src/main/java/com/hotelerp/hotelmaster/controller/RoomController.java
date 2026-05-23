@@ -33,8 +33,14 @@ public class RoomController {
     }
 
     @GetMapping(ServiceConstants.GET_ALL_ROOMS)
-    public ResponseEntity<StandardResponse<?>> getAllRooms() {
-        return ResponseEntity.ok(service.getAllRooms());
+    public ResponseEntity<StandardResponse<?>> getAllRooms(
+            @RequestParam(required = false) String searchText,
+            @RequestParam(required = false) Room.RoomStatus status,
+            @RequestParam(required = false) Long floorId,
+            @RequestParam(required = false) Long roomTypeId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(service.getAllRooms(searchText, status, floorId, roomTypeId, page, size));
     }
 
     @DeleteMapping(ServiceConstants.DELETE_ROOM)

@@ -11,6 +11,9 @@ import com.hotelerp.hotelmaster.repository.RoomRepository;
 import com.hotelerp.hotelmaster.repository.RoomTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,14 +123,27 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional(readOnly = true)
-    public StandardResponse<?> getAllRooms() {
-        log.info("Fetching all rooms");
+    public StandardResponse<?> getAllRooms(String searchText, Room.RoomStatus status, Long floorId, Long roomTypeId, int page, int size) {
+        log.info("Fetching all rooms with filters - searchText: {}, status: {}, floorId: {}, roomTypeId: {}, page: {}, size: {}", 
+                searchText, status, floorId, roomTypeId, page, size);
         try {
-            List<Room> list = repository.findAll();
-            List<RoomResponse> responses = list.stream().map(this::mapToResponse).collect(Collectors.toList());
-            return StandardResponse.success(responses, "Rooms fetched successfully");
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Room> roomPage = repository.searchRooms(searchText, status, floorId, roomTypeId, pageable);
+            
+            List<RoomResponse> responses = roomPage.getContent().stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList());
+
+            StandardResponse.ResponseMetadata metadata = StandardResponse.ResponseMetadata.builder()
+                    .totalRecords(roomPage.getTotalElements())
+                    .currentPage(roomPage.getNumber())
+                    .pageSize(roomPage.getSize())
+                    .totalPages(roomPage.getTotalPages())
+                    .build();
+
+            return StandardResponse.success(responses, "Rooms fetched successfully", metadata);
         } catch (Exception e) {
-            log.error("Error fetching all rooms: ", e);
+            log.error("Error fetching rooms: ", e);
             return StandardResponse.error("Failed to fetch rooms", "FETCH_ERROR", e.getMessage());
         }
     }

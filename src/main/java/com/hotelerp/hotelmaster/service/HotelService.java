@@ -7,6 +7,6 @@ public interface HotelService {
     StandardResponse<?> createHotel(HotelRequest request);
     StandardResponse<?> updateHotel(Long id, HotelRequest request);
     StandardResponse<?> getHotelById(Long id);
-    StandardResponse<?> getAllHotels();
+    StandardResponse<?> getAllHotels(String searchText, int page, int size);
     StandardResponse<?> deleteHotel(Long id);
 }

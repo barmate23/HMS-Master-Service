@@ -57,6 +57,14 @@ public class ServiceConstants {
     public static final String GET_ALL_ROOMS = "/getAllRooms";
     public static final String DELETE_ROOM = "/deleteRoom/{id}";
 
+    // ── Rate Plan ──────────────────────────────────────────────────────────────
+    public static final String RATE_PLAN_BASE_URL = "/api/v1/ratePlans";
+    public static final String CREATE_RATE_PLAN = "/createRatePlan";
+    public static final String UPDATE_RATE_PLAN = "/updateRatePlan/{id}";
+    public static final String GET_RATE_PLAN_BY_ID = "/getRatePlanById/{id}";
+    public static final String GET_ALL_RATE_PLANS = "/getAllRatePlans";
+    public static final String DELETE_RATE_PLAN = "/deleteRatePlan/{id}";
+
     // Legacy alias
     public static final String BASE_URL = GUEST_BASE_URL;
 }

@@ -9,6 +9,9 @@ import com.hotelerp.hotelmaster.repository.FloorRepository;
 import com.hotelerp.hotelmaster.repository.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -101,14 +104,27 @@ public class FloorServiceImpl implements FloorService {
 
     @Override
     @Transactional(readOnly = true)
-    public StandardResponse<?> getAllFloors() {
-        log.info("Fetching all floors");
+    public StandardResponse<?> getAllFloors(String searchText, Long hotelId, int page, int size) {
+        log.info("Fetching all floors with searchText: {}, hotelId: {}, page: {}, size: {}", 
+                searchText, hotelId, page, size);
         try {
-            List<Floor> list = repository.findAll();
-            List<FloorResponse> responses = list.stream().map(this::mapToResponse).collect(Collectors.toList());
-            return StandardResponse.success(responses, "Floors fetched successfully");
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Floor> floorPage = repository.searchFloors(searchText, hotelId, pageable);
+            
+            List<FloorResponse> responses = floorPage.getContent().stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList());
+
+            StandardResponse.ResponseMetadata metadata = StandardResponse.ResponseMetadata.builder()
+                    .totalRecords(floorPage.getTotalElements())
+                    .currentPage(floorPage.getNumber())
+                    .pageSize(floorPage.getSize())
+                    .totalPages(floorPage.getTotalPages())
+                    .build();
+
+            return StandardResponse.success(responses, "Floors fetched successfully", metadata);
         } catch (Exception e) {
-            log.error("Error fetching all floors: ", e);
+            log.error("Error fetching floors: ", e);
             return StandardResponse.error("Failed to fetch floors", "FETCH_ERROR", e.getMessage());
         }
     }

@@ -7,6 +7,6 @@ public interface FloorService {
     StandardResponse<?> createFloor(FloorRequest request);
     StandardResponse<?> updateFloor(Long id, FloorRequest request);
     StandardResponse<?> getFloorById(Long id);
-    StandardResponse<?> getAllFloors();
+    StandardResponse<?> getAllFloors(String searchText, Long hotelId, int page, int size);
     StandardResponse<?> deleteFloor(Long id);
 }

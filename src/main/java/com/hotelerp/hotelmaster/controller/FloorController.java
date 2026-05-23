@@ -33,8 +33,12 @@ public class FloorController {
     }
 
     @GetMapping(ServiceConstants.GET_ALL_FLOORS)
-    public ResponseEntity<StandardResponse<?>> getAllFloors() {
-        return ResponseEntity.ok(service.getAllFloors());
+    public ResponseEntity<StandardResponse<?>> getAllFloors(
+            @RequestParam(required = false) String searchText,
+            @RequestParam(required = false) Long hotelId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(service.getAllFloors(searchText, hotelId, page, size));
     }
 
     @DeleteMapping(ServiceConstants.DELETE_FLOOR)

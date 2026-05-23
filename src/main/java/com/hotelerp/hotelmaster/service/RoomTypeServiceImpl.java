@@ -9,6 +9,9 @@ import com.hotelerp.hotelmaster.repository.HotelRepository;
 import com.hotelerp.hotelmaster.repository.RoomTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,14 +110,27 @@ public class RoomTypeServiceImpl implements RoomTypeService {
 
     @Override
     @Transactional(readOnly = true)
-    public StandardResponse<?> getAllRoomTypes() {
-        log.info("Fetching all room types");
+    public StandardResponse<?> getAllRoomTypes(String searchText, Long hotelId, int page, int size) {
+        log.info("Fetching all room types with searchText: {}, hotelId: {}, page: {}, size: {}", 
+                searchText, hotelId, page, size);
         try {
-            List<RoomType> list = repository.findAll();
-            List<RoomTypeResponse> responses = list.stream().map(this::mapToResponse).collect(Collectors.toList());
-            return StandardResponse.success(responses, "Room types fetched successfully");
+            Pageable pageable = PageRequest.of(page, size);
+            Page<RoomType> roomTypePage = repository.searchRoomTypes(searchText, hotelId, pageable);
+            
+            List<RoomTypeResponse> responses = roomTypePage.getContent().stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList());
+
+            StandardResponse.ResponseMetadata metadata = StandardResponse.ResponseMetadata.builder()
+                    .totalRecords(roomTypePage.getTotalElements())
+                    .currentPage(roomTypePage.getNumber())
+                    .pageSize(roomTypePage.getSize())
+                    .totalPages(roomTypePage.getTotalPages())
+                    .build();
+
+            return StandardResponse.success(responses, "Room types fetched successfully", metadata);
         } catch (Exception e) {
-            log.error("Error fetching all room types: ", e);
+            log.error("Error fetching room types: ", e);
             return StandardResponse.error("Failed to fetch room types", "FETCH_ERROR", e.getMessage());
         }
     }
