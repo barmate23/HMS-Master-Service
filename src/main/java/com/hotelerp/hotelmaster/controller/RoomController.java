@@ -3,6 +3,7 @@ package com.hotelerp.hotelmaster.controller;
 import com.hotelerp.hotelmaster.common.StandardResponse;
 import com.hotelerp.hotelmaster.constants.ServiceConstants;
 import com.hotelerp.hotelmaster.dto.RoomRequest;
+import com.hotelerp.hotelmaster.entity.Room;
 import com.hotelerp.hotelmaster.service.RoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
