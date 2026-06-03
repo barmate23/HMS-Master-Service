@@ -6,7 +6,7 @@ spring:
     name: masterservice
 
   datasource:
-    url: jdbc:mysql://localhost:3306/hotel?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://erp-mysql:3306/hms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -30,7 +30,6 @@ spring:
   config:
     import: "optional:configserver:"
 
-
 management:
   endpoints:
     web:
@@ -42,31 +41,27 @@ management:
 
 logging:
   level:
-    com.schoolerp.student: INFO
+    com.hotelerp.masterservice: INFO
     org.springframework.web: DEBUG
     org.hibernate.SQL: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%X{logId:-}] [%X{requestId:-}] [%X{operation:-}] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%X{logId:-}] [%X{requestId:-}] [%X{operation:-}] [%thread] %-5level %logger{36} - %msg%n"
   file:
-    name: logs/frontoffice-service.log
+    name: logs/masterservice.log
 
-# Custom application properties
 app:
-  name: front Office Service
+  name: Master Service
   version: 1.0.0
-  description: Microservice for managing front office , reservations , check in & out
-
+  description: Microservice for managing master data
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/   # Eureka server URL
-    register-with-eureka: false
-    fetch-registry: false
+      defaultZone: http://adminserviceregistry:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
   instance:
     prefer-ip-address: true
-
-
-
-
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
