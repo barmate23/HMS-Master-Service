@@ -3,7 +3,7 @@ package com.hotelerp.hotelmaster.constants;
 public class ServiceConstants {
 
     // ── Guest ──────────────────────────────────────────────────────────────
-    public static final String GUEST_BASE_URL = "/api/v1/guests";
+    public static final String GUEST_BASE_URL = "/api/hotelMaster/v1/guests";
     public static final String CREATE_GUEST = "/createGuest";
     public static final String UPDATE_GUEST = "/updateGuest/{id}";
     public static final String GET_GUEST_BY_ID = "/getGuestById/{id}";
@@ -25,7 +25,7 @@ public class ServiceConstants {
     public static final String COMPLETE_CHECKOUT = "/checkout";
 
     // ── Hotel ──────────────────────────────────────────────────────────────
-    public static final String HOTEL_BASE_URL = "/api/v1/hotels";
+    public static final String HOTEL_BASE_URL = "/api/hotelMaster/v1/hotels";
     public static final String CREATE_HOTEL = "/createHotel";
     public static final String UPDATE_HOTEL = "/updateHotel/{id}";
     public static final String GET_HOTEL_BY_ID = "/getHotelById/{id}";
@@ -33,7 +33,7 @@ public class ServiceConstants {
     public static final String DELETE_HOTEL = "/deleteHotel/{id}";
 
     // ── Floor ──────────────────────────────────────────────────────────────
-    public static final String FLOOR_BASE_URL = "/api/v1/floors";
+    public static final String FLOOR_BASE_URL = "/api/hotelMaster/v1/floors";
     public static final String CREATE_FLOOR = "/createFloor";
     public static final String UPDATE_FLOOR = "/updateFloor/{id}";
     public static final String GET_FLOOR_BY_ID = "/getFloorById/{id}";
@@ -41,7 +41,7 @@ public class ServiceConstants {
     public static final String DELETE_FLOOR = "/deleteFloor/{id}";
 
     // ── Room Type ──────────────────────────────────────────────────────────────
-    public static final String ROOM_TYPE_BASE_URL = "/api/v1/roomTypes";
+    public static final String ROOM_TYPE_BASE_URL = "/api/hotelMaster/v1/roomTypes";
     public static final String CREATE_ROOM_TYPE = "/createRoomType";
     public static final String UPDATE_ROOM_TYPE = "/updateRoomType/{id}";
     public static final String GET_ROOM_TYPE_BY_ID = "/getRoomTypeById/{id}";
@@ -49,7 +49,7 @@ public class ServiceConstants {
     public static final String DELETE_ROOM_TYPE = "/deleteRoomType/{id}";
 
     // ── Room ──────────────────────────────────────────────────────────────
-    public static final String ROOM_BASE_URL = "/api/v1/rooms";
+    public static final String ROOM_BASE_URL = "/api/hotelMaster/v1/rooms";
     public static final String GET_AVAILABLE_ROOMS = "/available";
     public static final String CREATE_ROOM = "/createRoom";
     public static final String UPDATE_ROOM = "/updateRoom/{id}";
@@ -58,7 +58,7 @@ public class ServiceConstants {
     public static final String DELETE_ROOM = "/deleteRoom/{id}";
 
     // ── Rate Plan ──────────────────────────────────────────────────────────────
-    public static final String RATE_PLAN_BASE_URL = "/api/v1/ratePlans";
+    public static final String RATE_PLAN_BASE_URL = "/api/hotelMaster/v1/ratePlans";
     public static final String CREATE_RATE_PLAN = "/createRatePlan";
     public static final String UPDATE_RATE_PLAN = "/updateRatePlan/{id}";
     public static final String GET_RATE_PLAN_BY_ID = "/getRatePlanById/{id}";
