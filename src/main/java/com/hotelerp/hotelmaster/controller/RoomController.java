@@ -3,7 +3,6 @@ package com.hotelerp.hotelmaster.controller;
 import com.hotelerp.hotelmaster.common.StandardResponse;
 import com.hotelerp.hotelmaster.constants.ServiceConstants;
 import com.hotelerp.hotelmaster.dto.RoomRequest;
-import com.hotelerp.hotelmaster.entity.Room;
 import com.hotelerp.hotelmaster.service.RoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +35,12 @@ public class RoomController {
     @GetMapping(ServiceConstants.GET_ALL_ROOMS)
     public ResponseEntity<StandardResponse<?>> getAllRooms(
             @RequestParam(required = false) String searchText,
-            @RequestParam(required = false) Room.RoomStatus status,
+            @RequestParam(required = false) Long statusId,
             @RequestParam(required = false) Long floorId,
             @RequestParam(required = false) Long roomTypeId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(service.getAllRooms(searchText, status, floorId, roomTypeId, page, size));
+        return ResponseEntity.ok(service.getAllRooms(searchText, statusId, floorId, roomTypeId, page, size));
     }
 
     @DeleteMapping(ServiceConstants.DELETE_ROOM)

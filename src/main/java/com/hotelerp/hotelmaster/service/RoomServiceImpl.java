@@ -9,6 +9,8 @@ import com.hotelerp.hotelmaster.entity.RoomType;
 import com.hotelerp.hotelmaster.repository.FloorRepository;
 import com.hotelerp.hotelmaster.repository.RoomRepository;
 import com.hotelerp.hotelmaster.repository.RoomTypeRepository;
+import com.hotelerp.hotelmaster.repository.CommonMasterRepository;
+import com.hotelerp.hotelmaster.entity.CommonMaster;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,7 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository repository;
     private final FloorRepository floorRepository;
     private final RoomTypeRepository roomTypeRepository;
+    private final CommonMasterRepository commonMasterRepository;
 
     @Override
     @Transactional
@@ -46,11 +49,22 @@ public class RoomServiceImpl implements RoomService {
                 return StandardResponse.error("Room Type not found", "NOT_FOUND", "roomTypeId", null);
             }
 
+            CommonMaster status = null;
+            if (request.getStatusId() != null) {
+                status = commonMasterRepository.findById(request.getStatusId()).orElse(null);
+            }
+
+            CommonMaster hkStatus = null;
+            if (request.getHkStatusId() != null) {
+                hkStatus = commonMasterRepository.findById(request.getHkStatusId()).orElse(null);
+            }
+
             Room room = Room.builder()
                     .roomNumber(request.getRoomNumber())
                     .floor(floorOpt.get())
                     .roomType(typeOpt.get())
-                    .status(request.getStatus() != null ? request.getStatus() : Room.RoomStatus.VACANT)
+                    .status(status)
+                    .hkStatus(hkStatus)
                     .maxOccupancy(request.getMaxOccupancy())
                     .telephone(request.getTelephone())
                     .createdAt(LocalDateTime.now())
@@ -94,7 +108,15 @@ public class RoomServiceImpl implements RoomService {
             }
 
             room.setRoomNumber(request.getRoomNumber());
-            room.setStatus(request.getStatus());
+            
+            if (request.getStatusId() != null) {
+                commonMasterRepository.findById(request.getStatusId()).ifPresent(room::setStatus);
+            }
+            
+            if (request.getHkStatusId() != null) {
+                commonMasterRepository.findById(request.getHkStatusId()).ifPresent(room::setHkStatus);
+            }
+
             room.setMaxOccupancy(request.getMaxOccupancy());
             room.setTelephone(request.getTelephone());
             room.setUpdatedAt(LocalDateTime.now());
@@ -123,12 +145,12 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional(readOnly = true)
-    public StandardResponse<?> getAllRooms(String searchText, Room.RoomStatus status, Long floorId, Long roomTypeId, int page, int size) {
-        log.info("Fetching all rooms with filters - searchText: {}, status: {}, floorId: {}, roomTypeId: {}, page: {}, size: {}", 
-                searchText, status, floorId, roomTypeId, page, size);
+    public StandardResponse<?> getAllRooms(String searchText, Long statusId, Long floorId, Long roomTypeId, int page, int size) {
+        log.info("Fetching all rooms with filters - searchText: {}, statusId: {}, floorId: {}, roomTypeId: {}, page: {}, size: {}", 
+                searchText, statusId, floorId, roomTypeId, page, size);
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<Room> roomPage = repository.searchRooms(searchText, status, floorId, roomTypeId, pageable);
+            Page<Room> roomPage = repository.searchRooms(searchText, statusId, floorId, roomTypeId, pageable);
             
             List<RoomResponse> responses = roomPage.getContent().stream()
                     .map(this::mapToResponse)
@@ -159,6 +181,7 @@ public class RoomServiceImpl implements RoomService {
             }
             Room room = opt.get();
             room.setIsActive(false);
+            room.setIsDeleted(true);
             room.setUpdatedAt(LocalDateTime.now());
             repository.save(room);
             return StandardResponse.success("Room deleted successfully");
@@ -176,7 +199,10 @@ public class RoomServiceImpl implements RoomService {
                 .floorNumber(room.getFloor().getFloorNumber())
                 .roomTypeId(room.getRoomType().getId())
                 .roomTypeName(room.getRoomType().getName())
-                .status(room.getStatus())
+                .statusId(room.getStatus() != null ? room.getStatus().getId() : null)
+                .statusValue(room.getStatus() != null ? room.getStatus().getValue() : null)
+                .hkStatusId(room.getHkStatus() != null ? room.getHkStatus().getId() : null)
+                .hkStatusValue(room.getHkStatus() != null ? room.getHkStatus().getValue() : null)
                 .maxOccupancy(room.getMaxOccupancy())
                 .telephone(room.getTelephone())
                 .createdAt(room.getCreatedAt())
