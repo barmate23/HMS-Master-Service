@@ -1,6 +1,6 @@
 package com.hotelerp.hotelmaster.dto;
 
-import com.hotelerp.hotelmaster.entity.Room;
+import com.hotelerp.common.entity.Room;
 import lombok.*;
 
 @Data
@@ -11,7 +11,8 @@ public class RoomRequest {
     private String roomNumber;
     private Long floorId;
     private Long roomTypeId;
-    private Room.RoomStatus status;
+    private Long statusId;
+    private Long hkStatusId;
     private Integer maxOccupancy;
     private String telephone;
 }

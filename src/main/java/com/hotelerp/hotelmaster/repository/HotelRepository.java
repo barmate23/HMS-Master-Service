@@ -1,6 +1,6 @@
 package com.hotelerp.hotelmaster.repository;
 
-import com.hotelerp.hotelmaster.entity.Hotel;
+import com.hotelerp.common.entity.Hotel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

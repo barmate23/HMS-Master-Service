@@ -3,12 +3,14 @@ package com.hotelerp.hotelmaster.service;
 import com.hotelerp.hotelmaster.common.StandardResponse;
 import com.hotelerp.hotelmaster.dto.RoomRequest;
 import com.hotelerp.hotelmaster.dto.RoomResponse;
-import com.hotelerp.hotelmaster.entity.Floor;
-import com.hotelerp.hotelmaster.entity.Room;
-import com.hotelerp.hotelmaster.entity.RoomType;
+import com.hotelerp.common.entity.Floor;
+import com.hotelerp.common.entity.Room;
+import com.hotelerp.common.entity.RoomType;
 import com.hotelerp.hotelmaster.repository.FloorRepository;
 import com.hotelerp.hotelmaster.repository.RoomRepository;
 import com.hotelerp.hotelmaster.repository.RoomTypeRepository;
+import com.hotelerp.common.entity.CommonMaster;
+import com.hotelerp.hotelmaster.repository.CommonMasterRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,7 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository repository;
     private final FloorRepository floorRepository;
     private final RoomTypeRepository roomTypeRepository;
+    private final CommonMasterRepository commonMasterRepository;
 
     @Override
     @Transactional
@@ -50,13 +53,19 @@ public class RoomServiceImpl implements RoomService {
                     .roomNumber(request.getRoomNumber())
                     .floor(floorOpt.get())
                     .roomType(typeOpt.get())
-                    .status(request.getStatus() != null ? request.getStatus() : Room.RoomStatus.VACANT)
                     .maxOccupancy(request.getMaxOccupancy())
                     .telephone(request.getTelephone())
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .isActive(true)
                     .build();
+
+            if (request.getStatusId() != null) {
+                commonMasterRepository.findById(request.getStatusId()).ifPresent(room::setStatus);
+            }
+            if (request.getHkStatusId() != null) {
+                commonMasterRepository.findById(request.getHkStatusId()).ifPresent(room::setHkStatus);
+            }
             
             Room saved = repository.save(room);
             return StandardResponse.success(mapToResponse(saved), "Room created successfully");
@@ -94,7 +103,14 @@ public class RoomServiceImpl implements RoomService {
             }
 
             room.setRoomNumber(request.getRoomNumber());
-            room.setStatus(request.getStatus());
+            
+            if (request.getStatusId() != null) {
+                commonMasterRepository.findById(request.getStatusId()).ifPresent(room::setStatus);
+            }
+            if (request.getHkStatusId() != null) {
+                commonMasterRepository.findById(request.getHkStatusId()).ifPresent(room::setHkStatus);
+            }
+
             room.setMaxOccupancy(request.getMaxOccupancy());
             room.setTelephone(request.getTelephone());
             room.setUpdatedAt(LocalDateTime.now());
@@ -123,12 +139,12 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional(readOnly = true)
-    public StandardResponse<?> getAllRooms(String searchText, Room.RoomStatus status, Long floorId, Long roomTypeId, int page, int size) {
-        log.info("Fetching all rooms with filters - searchText: {}, status: {}, floorId: {}, roomTypeId: {}, page: {}, size: {}", 
-                searchText, status, floorId, roomTypeId, page, size);
+    public StandardResponse<?> getAllRooms(String searchText, Long statusId, Long hkStatusId, Long floorId, Long roomTypeId, int page, int size) {
+        log.info("Fetching all rooms with filters - searchText: {}, statusId: {}, hkStatusId: {}, floorId: {}, roomTypeId: {}, page: {}, size: {}", 
+                searchText, statusId, hkStatusId, floorId, roomTypeId, page, size);
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<Room> roomPage = repository.searchRooms(searchText, status, floorId, roomTypeId, pageable);
+            Page<Room> roomPage = repository.searchRooms(searchText, statusId, hkStatusId, floorId, roomTypeId, pageable);
             
             List<RoomResponse> responses = roomPage.getContent().stream()
                     .map(this::mapToResponse)
@@ -169,19 +185,31 @@ public class RoomServiceImpl implements RoomService {
     }
 
     private RoomResponse mapToResponse(Room room) {
-        return RoomResponse.builder()
+        RoomResponse.RoomResponseBuilder builder = RoomResponse.builder()
                 .id(room.getId())
                 .roomNumber(room.getRoomNumber())
                 .floorId(room.getFloor().getId())
                 .floorNumber(room.getFloor().getFloorNumber())
                 .roomTypeId(room.getRoomType().getId())
                 .roomTypeName(room.getRoomType().getName())
-                .status(room.getStatus())
                 .maxOccupancy(room.getMaxOccupancy())
                 .telephone(room.getTelephone())
                 .createdAt(room.getCreatedAt())
                 .updatedAt(room.getUpdatedAt())
-                .isActive(room.getIsActive())
-                .build();
+                .isActive(room.getIsActive());
+
+        if (room.getStatus() != null) {
+            builder.statusId(room.getStatus().getId())
+                   .statusCode(room.getStatus().getCode())
+                   .statusValue(room.getStatus().getValue());
+        }
+
+        if (room.getHkStatus() != null) {
+            builder.hkStatusId(room.getHkStatus().getId())
+                   .hkStatusCode(room.getHkStatus().getCode())
+                   .hkStatusValue(room.getHkStatus().getValue());
+        }
+
+        return builder.build();
     }
 }

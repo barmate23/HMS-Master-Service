@@ -3,7 +3,7 @@ package com.hotelerp.hotelmaster.service;
 import com.hotelerp.hotelmaster.common.StandardResponse;
 import com.hotelerp.hotelmaster.dto.HotelRequest;
 import com.hotelerp.hotelmaster.dto.HotelResponse;
-import com.hotelerp.hotelmaster.entity.Hotel;
+import com.hotelerp.common.entity.Hotel;
 import com.hotelerp.hotelmaster.repository.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

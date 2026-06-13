@@ -1,6 +1,5 @@
 package com.hotelerp.hotelmaster.dto;
 
-import com.hotelerp.hotelmaster.entity.Room;
 import lombok.*;
 import java.time.LocalDateTime;
 
@@ -15,7 +14,12 @@ public class RoomResponse {
     private String floorNumber;
     private Long   roomTypeId;
     private String roomTypeName;
-    private Room.RoomStatus status;
+    private Long   statusId;
+    private String statusCode;
+    private String statusValue;
+    private Long   hkStatusId;
+    private String hkStatusCode;
+    private String hkStatusValue;
     private Integer maxOccupancy;
     private String telephone;
     private LocalDateTime createdAt;

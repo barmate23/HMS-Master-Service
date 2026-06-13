@@ -1,6 +1,6 @@
 package com.hotelerp.hotelmaster.repository;
 
-import com.hotelerp.hotelmaster.entity.RatePlan;
+import com.hotelerp.common.entity.RatePlan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
