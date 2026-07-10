@@ -65,6 +65,15 @@ public class ServiceConstants {
     public static final String GET_ALL_RATE_PLANS = "/getAllRatePlans";
     public static final String DELETE_RATE_PLAN = "/deleteRatePlan/{id}";
 
+    // ── GST Rule ──────────────────────────────────────────────────────────────
+    public static final String GST_RULE_BASE_URL = "/api/masterService/v1/gstRules";
+    public static final String CREATE_GST_RULE = "/createGstRule";
+    public static final String UPDATE_GST_RULE = "/updateGstRule/{id}";
+    public static final String GET_GST_RULE_BY_ID = "/getGstRuleById/{id}";
+    public static final String GET_ALL_GST_RULES = "/getAllGstRules";
+    public static final String DELETE_GST_RULE = "/deleteGstRule/{id}";
+    public static final String GET_GST_CATEGORIES = "/categories";
+
     // Legacy alias
     public static final String BASE_URL = GUEST_BASE_URL;
 }
