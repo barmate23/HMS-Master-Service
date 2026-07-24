@@ -5,8 +5,8 @@ pipeline {
         IMAGE_NAME = "masterservice"
         CONTAINER_NAME = "masterservice"
         DOCKER_NETWORK = "updated_orgadmin_rmscadminnetwork"
-        HOST_PORT = "9002"
-        CONTAINER_PORT = "9002"
+        HOST_PORT = "9012"
+        CONTAINER_PORT = "9012"
         DOCKER_BUILDKIT = "0"
     }
 
