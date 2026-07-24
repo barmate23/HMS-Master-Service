@@ -3,9 +3,12 @@ package com.hotelerp.hotelmaster.service;
 import com.hotelerp.hotelmaster.common.StandardResponse;
 import com.hotelerp.hotelmaster.dto.RoomRequest;
 import com.hotelerp.hotelmaster.dto.RoomResponse;
+import com.hotelerp.hotelmaster.entity.Booking;
 import com.hotelerp.hotelmaster.entity.Floor;
+import com.hotelerp.hotelmaster.entity.Guest;
 import com.hotelerp.hotelmaster.entity.Room;
 import com.hotelerp.hotelmaster.entity.RoomType;
+import com.hotelerp.hotelmaster.repository.BookingRepository;
 import com.hotelerp.hotelmaster.repository.FloorRepository;
 import com.hotelerp.hotelmaster.repository.RoomRepository;
 import com.hotelerp.hotelmaster.repository.RoomTypeRepository;
@@ -33,6 +36,7 @@ public class RoomServiceImpl implements RoomService {
     private final FloorRepository floorRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final CommonMasterRepository commonMasterRepository;
+    private final BookingRepository bookingRepository;
 
     @Override
     @Transactional
@@ -153,7 +157,7 @@ public class RoomServiceImpl implements RoomService {
             Page<Room> roomPage = repository.searchRooms(searchText, statusId, floorId, roomTypeId, pageable);
             
             List<RoomResponse> responses = roomPage.getContent().stream()
-                    .map(this::mapToResponse)
+                    .map(this::mapToResponseWithGuest)
                     .collect(Collectors.toList());
 
             StandardResponse.ResponseMetadata metadata = StandardResponse.ResponseMetadata.builder()
@@ -209,5 +213,16 @@ public class RoomServiceImpl implements RoomService {
                 .updatedAt(room.getUpdatedAt())
                 .isActive(room.getIsActive())
                 .build();
+    }
+
+    private RoomResponse mapToResponseWithGuest(Room room) {
+        RoomResponse response = mapToResponse(room);
+        bookingRepository.findActiveBookingByRoomId(room.getId())
+                .ifPresent(booking -> {
+                    Guest guest = booking.getReservation().getGuest();
+                    String guestName = (guest.getFirstName() + " " + guest.getLastName()).trim();
+                    response.setGuestName(guestName);
+                });
+        return response;
     }
 }
