@@ -6,7 +6,7 @@ services:
     image: masterservice:latest
     container_name: masterservice
     ports:
-      - "9002:9002"
+      - "9012:9012"
     networks:
       - updated_orgadmin_rmscadminnetwork
     environment:
