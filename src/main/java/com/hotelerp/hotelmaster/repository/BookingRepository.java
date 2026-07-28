@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -26,5 +27,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                   AND b.checkInDate <= CURRENT_DATE
                   AND b.checkOutDate >= CURRENT_DATE
             """)
-    Optional<Booking> findActiveBookingByRoomId(@Param("roomId") Long roomId);
+    List<Booking> findActiveBookingByRoomId(@Param("roomId") Long roomId);
 }

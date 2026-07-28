@@ -217,12 +217,12 @@ public class RoomServiceImpl implements RoomService {
 
     private RoomResponse mapToResponseWithGuest(Room room) {
         RoomResponse response = mapToResponse(room);
-        bookingRepository.findActiveBookingByRoomId(room.getId())
-                .ifPresent(booking -> {
-                    Guest guest = booking.getReservation().getGuest();
-                    String guestName = (guest.getFirstName() + " " + guest.getLastName()).trim();
-                    response.setGuestName(guestName);
-                });
+        List<Booking> bookings = bookingRepository.findActiveBookingByRoomId(room.getId());
+        if(!bookings.isEmpty()){
+            Guest guest = bookings.get(0).getReservation().getGuest();
+            String guestName = (guest.getFirstName() + " " + guest.getLastName()).trim();
+            response.setGuestName(guestName);
+        }
         return response;
     }
 }
