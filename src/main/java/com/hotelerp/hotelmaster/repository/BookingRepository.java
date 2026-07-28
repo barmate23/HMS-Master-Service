@@ -16,12 +16,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
      * whose check-out date is today or in the future (i.e. guest is still
      * checked in / upcoming).
      */
-    @Query("SELECT b FROM Booking b " +
-            "JOIN FETCH b.reservation r " +
-            "JOIN FETCH r.guest g " +
-            "WHERE b.room.id = :roomId " +
-            "AND b.isDeleted = false " +
-            "AND b.checkOutDate >= CURRENT_DATE " +
-            "ORDER BY b.checkInDate ASC")
+    @Query("""
+                SELECT b
+                FROM Booking b
+                JOIN FETCH b.reservation r
+                JOIN FETCH r.guest g
+                WHERE b.room.id = :roomId
+                  AND b.isDeleted = false
+                  AND b.checkInDate <= CURRENT_DATE
+                  AND b.checkOutDate >= CURRENT_DATE
+            """)
     Optional<Booking> findActiveBookingByRoomId(@Param("roomId") Long roomId);
 }
