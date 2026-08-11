@@ -1,6 +1,7 @@
 package com.hotelerp.hotelmaster.service;
 
 import com.hotelerp.hotelmaster.common.StandardResponse;
+import com.hotelerp.hotelmaster.config.LoginUser;
 import com.hotelerp.hotelmaster.dto.HotelRequest;
 import com.hotelerp.hotelmaster.dto.HotelResponse;
 import com.hotelerp.hotelmaster.entity.Hotel;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class HotelServiceImpl implements HotelService {
 
     private final HotelRepository repository;
+    private final LoginUser loginUser;
 
     @Override
     @Transactional
@@ -104,21 +106,10 @@ public class HotelServiceImpl implements HotelService {
     public StandardResponse<?> getAllHotels(String searchText, int page, int size) {
         log.info("Fetching all hotels with searchText: {}, page: {}, size: {}", searchText, page, size);
         try {
-            Pageable pageable = PageRequest.of(page, size);
-            Page<Hotel> hotelPage = repository.searchHotels(searchText, pageable);
-            
-            List<HotelResponse> responses = hotelPage.getContent().stream()
-                    .map(this::mapToResponse)
-                    .collect(Collectors.toList());
-
-            StandardResponse.ResponseMetadata metadata = StandardResponse.ResponseMetadata.builder()
-                    .totalRecords(hotelPage.getTotalElements())
-                    .currentPage(hotelPage.getNumber())
-                    .pageSize(hotelPage.getSize())
-                    .totalPages(hotelPage.getTotalPages())
-                    .build();
-
-            return StandardResponse.success(responses, "Hotels fetched successfully", metadata);
+            if (loginUser != null && loginUser.getHotelId() != null) {
+                return getHotelById(loginUser.getHotelId());
+            }
+            return StandardResponse.success(null, "Hotel ID is not present for login user");
         } catch (Exception e) {
             log.error("Error fetching hotels: ", e);
             return StandardResponse.error("Failed to fetch hotels", "FETCH_ERROR", e.getMessage());

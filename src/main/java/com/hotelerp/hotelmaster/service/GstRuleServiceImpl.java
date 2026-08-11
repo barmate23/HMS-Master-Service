@@ -1,11 +1,14 @@
 package com.hotelerp.hotelmaster.service;
 
 import com.hotelerp.hotelmaster.common.StandardResponse;
+import com.hotelerp.hotelmaster.config.LoginUser;
 import com.hotelerp.hotelmaster.dto.GstRuleRequest;
 import com.hotelerp.hotelmaster.dto.GstRuleResponse;
 import com.hotelerp.hotelmaster.entity.GstRule;
+import com.hotelerp.hotelmaster.entity.Hotel;
 import com.hotelerp.hotelmaster.repository.CommonMasterRepository;
 import com.hotelerp.hotelmaster.repository.GstRuleRepository;
+import com.hotelerp.hotelmaster.repository.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,6 +32,8 @@ public class GstRuleServiceImpl implements GstRuleService {
 
     private final GstRuleRepository gstRuleRepository;
     private final CommonMasterRepository commonMasterRepository;
+    private final HotelRepository hotelRepository;
+    private final LoginUser loginUser;
 
     // ─────────────────────────── CREATE ────────────────────────────────────
 
@@ -37,14 +42,30 @@ public class GstRuleServiceImpl implements GstRuleService {
     public StandardResponse<?> createGstRule(GstRuleRequest request) {
         log.info("Request to create GST rule for category: {}", request.getServiceCategory());
         try {
-            // Prevent duplicate active rule for the same service category
-            if (gstRuleRepository.existsByServiceCategoryIgnoreCaseAndIsActiveTrue(request.getServiceCategory())) {
+            Long hotelId = (loginUser != null) ? loginUser.getHotelId() : null;
+
+            if (hotelId == null) {
+                return StandardResponse.error(
+                        "Hotel not found. Please create a hotel first before creating a GST rule",
+                        "HOTEL_NOT_FOUND", "hotelId", "Hotel ID is missing in token");
+            }
+
+            Optional<Hotel> hotelOpt = hotelRepository.findById(hotelId);
+            if (hotelOpt.isEmpty()) {
+                return StandardResponse.error(
+                        "Hotel not found. Please create a hotel first before creating a GST rule",
+                        "HOTEL_NOT_FOUND", "hotelId", "No hotel exists for ID: " + hotelId);
+            }
+
+            // Prevent duplicate active rule for the same service category within the hotel
+            if (gstRuleRepository.existsByServiceCategoryIgnoreCaseAndHotelIdAndIsActiveTrue(request.getServiceCategory(), hotelId)) {
                 return StandardResponse.error(
                         "An active GST rule already exists for category: " + request.getServiceCategory(),
                         "DUPLICATE_CATEGORY", "serviceCategory", null);
             }
 
             GstRule rule = GstRule.builder()
+                    .hotel(hotelOpt.get())
                     .serviceCategory(request.getServiceCategory())
                     .hsnSacCode(request.getHsnSacCode())
                     .cgstRate(request.getCgstRate())
@@ -77,9 +98,18 @@ public class GstRuleServiceImpl implements GstRuleService {
             }
             GstRule rule = existingOpt.get();
 
+            Long targetHotelId = (loginUser != null) ? loginUser.getHotelId() : null;
+            if (targetHotelId != null && (rule.getHotel() == null || !rule.getHotel().getId().equals(targetHotelId))) {
+                Optional<Hotel> hotelOpt = hotelRepository.findById(targetHotelId);
+                if (hotelOpt.isPresent()) {
+                    rule.setHotel(hotelOpt.get());
+                }
+            }
+
             // Allow update if same record or no other active rule with that category
             boolean categoryChanged = !rule.getServiceCategory().equalsIgnoreCase(request.getServiceCategory());
-            if (categoryChanged && gstRuleRepository.existsByServiceCategoryIgnoreCaseAndIsActiveTrue(request.getServiceCategory())) {
+            Long currentHotelId = rule.getHotel() != null ? rule.getHotel().getId() : targetHotelId;
+            if (categoryChanged && currentHotelId != null && gstRuleRepository.existsByServiceCategoryIgnoreCaseAndHotelIdAndIsActiveTrue(request.getServiceCategory(), currentHotelId)) {
                 return StandardResponse.error(
                         "An active GST rule already exists for category: " + request.getServiceCategory(),
                         "DUPLICATE_CATEGORY", "serviceCategory", null);
@@ -120,10 +150,11 @@ public class GstRuleServiceImpl implements GstRuleService {
     @Override
     @Transactional(readOnly = true)
     public StandardResponse<?> getAllGstRules(String searchText, int page, int size) {
-        log.info("Fetching all GST rules | search: {}, page: {}, size: {}", searchText, page, size);
+        Long hotelId = (loginUser != null) ? loginUser.getHotelId() : null;
+        log.info("Fetching all GST rules | search: {}, hotelId: {}, page: {}, size: {}", searchText, hotelId, page, size);
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<GstRule> resultPage = gstRuleRepository.searchGstRules(searchText, pageable);
+            Page<GstRule> resultPage = gstRuleRepository.searchGstRules(searchText, hotelId, pageable);
 
             List<GstRuleResponse> responses = resultPage.getContent().stream()
                     .map(this::mapToResponse)
@@ -189,6 +220,8 @@ public class GstRuleServiceImpl implements GstRuleService {
     private GstRuleResponse mapToResponse(GstRule rule) {
         return GstRuleResponse.builder()
                 .id(rule.getId())
+                .hotelId(rule.getHotel() != null ? rule.getHotel().getId() : null)
+                .hotelName(rule.getHotel() != null ? rule.getHotel().getName() : null)
                 .displayId("GST-" + rule.getId())
                 .serviceCategory(rule.getServiceCategory())
                 .hsnSacCode(rule.getHsnSacCode())

@@ -13,9 +13,10 @@ public interface GstRuleRepository extends JpaRepository<GstRule, Long> {
 
     @Query("SELECT g FROM GstRule g WHERE " +
             "(:searchText IS NULL OR LOWER(g.serviceCategory) LIKE LOWER(CONCAT('%', :searchText, '%')) " +
-            "OR LOWER(g.hsnSacCode) LIKE LOWER(CONCAT('%', :searchText, '%'))) " +
-            "AND g.isActive = true")
-    Page<GstRule> searchGstRules(@Param("searchText") String searchText, Pageable pageable);
+            "OR LOWER(g.hsnSacCode) LIKE LOWER(CONCAT('%', :searchText, '%'))) AND " +
+            "(:hotelId IS NULL OR g.hotel.id = :hotelId) AND " +
+            "g.isActive = true")
+    Page<GstRule> searchGstRules(@Param("searchText") String searchText, @Param("hotelId") Long hotelId, Pageable pageable);
 
-    boolean existsByServiceCategoryIgnoreCaseAndIsActiveTrue(String serviceCategory);
+    boolean existsByServiceCategoryIgnoreCaseAndHotelIdAndIsActiveTrue(String serviceCategory, Long hotelId);
 }

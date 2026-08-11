@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 public class GstRuleResponse {
 
     private Long id;
+    private Long hotelId;
+    private String hotelName;
     private String displayId;        // e.g. "GST-1"
     private String serviceCategory;
     private String hsnSacCode;

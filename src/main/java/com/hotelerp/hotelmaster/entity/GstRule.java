@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "gst_rules", indexes = {
-        @Index(name = "idx_gst_service_category", columnList = "service_category")
+        @Index(name = "idx_gst_service_category", columnList = "service_category"),
+        @Index(name = "idx_gst_hotel_id", columnList = "hotel_id")
 })
 @Getter
 @Setter
@@ -20,6 +21,10 @@ public class GstRule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id", nullable = false)
+    private Hotel hotel;
 
     /** Service category (fetched from CommonMaster, e.g. Room, Food, Laundry) */
     @Column(name = "service_category", nullable = false, length = 100)

@@ -14,6 +14,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class GstRuleRequest {
 
+    private Long hotelId;
+
     @NotBlank(message = "Service category is required")
     private String serviceCategory;
 

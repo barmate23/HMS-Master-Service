@@ -1,6 +1,7 @@
 package com.hotelerp.hotelmaster.service;
 
 import com.hotelerp.hotelmaster.common.StandardResponse;
+import com.hotelerp.hotelmaster.config.LoginUser;
 import com.hotelerp.hotelmaster.dto.RoomTypeRequest;
 import com.hotelerp.hotelmaster.dto.RoomTypeResponse;
 import com.hotelerp.hotelmaster.entity.Hotel;
@@ -27,15 +28,22 @@ public class RoomTypeServiceImpl implements RoomTypeService {
 
     private final RoomTypeRepository repository;
     private final HotelRepository hotelRepository;
+    private final LoginUser loginUser;
 
     @Override
     @Transactional
     public StandardResponse<?> createRoomType(RoomTypeRequest request) {
         log.info("Request received to create room type: {}", request.getName());
         try {
-            Optional<Hotel> hotelOpt = hotelRepository.findById(request.getHotelId());
+            Long hotelId = (loginUser != null) ? loginUser.getHotelId() : null;
+
+            if (hotelId == null) {
+                return StandardResponse.error("Hotel not found. Please create a hotel first before creating a room type", "HOTEL_NOT_FOUND", "hotelId", "Hotel ID is missing in token");
+            }
+
+            Optional<Hotel> hotelOpt = hotelRepository.findById(hotelId);
             if (hotelOpt.isEmpty()) {
-                return StandardResponse.error("Hotel not found", "NOT_FOUND", "hotelId", null);
+                return StandardResponse.error("Hotel not found. Please create a hotel first before creating a room type", "HOTEL_NOT_FOUND", "hotelId", "No hotel exists for ID: " + hotelId);
             }
 
             RoomType roomType = RoomType.builder()
@@ -70,8 +78,10 @@ public class RoomTypeServiceImpl implements RoomTypeService {
             }
             RoomType roomType = existingOpt.get();
             
-            if (!roomType.getHotel().getId().equals(request.getHotelId())) {
-                Optional<Hotel> hotelOpt = hotelRepository.findById(request.getHotelId());
+            Long targetHotelId = (loginUser != null) ? loginUser.getHotelId() : null;
+
+            if (targetHotelId != null && !roomType.getHotel().getId().equals(targetHotelId)) {
+                Optional<Hotel> hotelOpt = hotelRepository.findById(targetHotelId);
                 if (hotelOpt.isEmpty()) {
                     return StandardResponse.error("Hotel not found", "NOT_FOUND", "hotelId", null);
                 }
@@ -110,7 +120,8 @@ public class RoomTypeServiceImpl implements RoomTypeService {
 
     @Override
     @Transactional(readOnly = true)
-    public StandardResponse<?> getAllRoomTypes(String searchText, Long hotelId, int page, int size) {
+    public StandardResponse<?> getAllRoomTypes(String searchText, int page, int size) {
+        Long hotelId = (loginUser != null) ? loginUser.getHotelId() : null;
         log.info("Fetching all room types with searchText: {}, hotelId: {}, page: {}, size: {}", 
                 searchText, hotelId, page, size);
         try {

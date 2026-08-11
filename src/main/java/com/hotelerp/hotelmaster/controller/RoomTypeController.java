@@ -35,10 +35,9 @@ public class RoomTypeController {
     @GetMapping(ServiceConstants.GET_ALL_ROOM_TYPES)
     public ResponseEntity<StandardResponse<?>> getAllRoomTypes(
             @RequestParam(required = false) String searchText,
-            @RequestParam(required = false) Long hotelId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(service.getAllRoomTypes(searchText, hotelId, page, size));
+        return ResponseEntity.ok(service.getAllRoomTypes(searchText, page, size));
     }
 
     @DeleteMapping(ServiceConstants.DELETE_ROOM_TYPE)
