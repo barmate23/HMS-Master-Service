@@ -5,7 +5,9 @@ import com.hotelerp.hotelmaster.config.LoginUser;
 import com.hotelerp.hotelmaster.dto.HotelRequest;
 import com.hotelerp.hotelmaster.dto.HotelResponse;
 import com.hotelerp.hotelmaster.entity.Hotel;
+import com.hotelerp.hotelmaster.entity.User;
 import com.hotelerp.hotelmaster.repository.HotelRepository;
+import com.hotelerp.hotelmaster.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class HotelServiceImpl implements HotelService {
 
     private final HotelRepository repository;
+    private final UserRepository userRepository;
     private final LoginUser loginUser;
 
     @Override
@@ -49,6 +52,9 @@ public class HotelServiceImpl implements HotelService {
                     .build();
             
             Hotel saved = repository.save(hotel);
+            User user = userRepository.findById(loginUser.getUserId()).get();
+            user.setProperty(hotel);
+            userRepository.save(user);
             return StandardResponse.success(mapToResponse(saved), "Hotel created successfully");
         } catch (Exception e) {
             log.error("Error creating hotel: ", e);
