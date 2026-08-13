@@ -46,7 +46,6 @@ public class HotelServiceImpl implements HotelService {
                     .state(request.getState())
                     .country(request.getCountry())
                     .zipCode(request.getZipCode())
-                    .logoUrl(request.getLogoUrl())
                     .logo(request.getLogo())
                     .starRatingCategory(request.getStarRatingCategory())
                     .tagline(request.getTagline())
@@ -93,7 +92,6 @@ public class HotelServiceImpl implements HotelService {
             hotel.setState(request.getState());
             hotel.setCountry(request.getCountry());
             hotel.setZipCode(request.getZipCode());
-            hotel.setLogoUrl(request.getLogoUrl());
             if (request.getLogo() != null) {
                 hotel.setLogo(request.getLogo());
             }
@@ -185,7 +183,6 @@ public class HotelServiceImpl implements HotelService {
                 .state(hotel.getState())
                 .country(hotel.getCountry())
                 .zipCode(hotel.getZipCode())
-                .logoUrl(hotel.getLogoUrl())
                 .logo(hotel.getLogo())
                 .starRatingCategory(hotel.getStarRatingCategory())
                 .tagline(hotel.getTagline())

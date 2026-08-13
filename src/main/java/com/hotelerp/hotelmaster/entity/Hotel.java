@@ -47,9 +47,6 @@
         @Column(name = "zipCode", nullable = false, length = 10)
         private String zipCode;
 
-        @Column(name = "logoUrl", columnDefinition = "TEXT")
-        private String logoUrl;
-
         @Lob
         @Column(name = "logo", columnDefinition = "LONGBLOB")
         private byte[] logo;

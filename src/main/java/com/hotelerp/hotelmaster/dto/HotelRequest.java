@@ -24,9 +24,6 @@ public class HotelRequest {
     private String country;
     private String zipCode;
 
-    @JsonAlias({"logoUrl"})
-    private String logoUrl;
-
     private byte[] logo;
 
     @JsonAlias({"starRating", "starRatingCategory"})
