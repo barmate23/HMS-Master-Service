@@ -2,6 +2,7 @@ package com.hotelerp.hotelmaster.dto;
 
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -24,4 +25,5 @@ public class RoomResponse {
     private LocalDateTime updatedAt;
     private Boolean isActive;
     private String guestName;
+    private List<RoomPhotoDTO> photos;
 }

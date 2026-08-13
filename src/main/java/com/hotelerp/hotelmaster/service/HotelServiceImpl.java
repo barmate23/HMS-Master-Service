@@ -7,6 +7,7 @@ import com.hotelerp.hotelmaster.dto.HotelResponse;
 import com.hotelerp.hotelmaster.entity.Hotel;
 import com.hotelerp.hotelmaster.entity.User;
 import com.hotelerp.hotelmaster.repository.HotelRepository;
+import com.hotelerp.hotelmaster.repository.RoomRepository;
 import com.hotelerp.hotelmaster.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class HotelServiceImpl implements HotelService {
 
     private final HotelRepository repository;
     private final UserRepository userRepository;
+    private final RoomRepository roomRepository;
     private final LoginUser loginUser;
 
     @Override
@@ -44,6 +46,16 @@ public class HotelServiceImpl implements HotelService {
                     .state(request.getState())
                     .country(request.getCountry())
                     .zipCode(request.getZipCode())
+                    .logoUrl(request.getLogoUrl())
+                    .logo(request.getLogo())
+                    .starRatingCategory(request.getStarRatingCategory())
+                    .tagline(request.getTagline())
+                    .receptionDeskPhone(request.getReceptionDeskPhone())
+                    .websiteUrl(request.getWebsiteUrl())
+                    .gstin(request.getGstin())
+                    .fssaiNo(request.getFssaiNo())
+                    .checkInTime(request.getCheckInTime())
+                    .checkOutTime(request.getCheckOutTime())
                     .totalRooms(request.getTotalRooms())
                     .currency(request.getCurrency() != null ? request.getCurrency() : "USD")
                     .createdAt(LocalDateTime.now())
@@ -81,8 +93,24 @@ public class HotelServiceImpl implements HotelService {
             hotel.setState(request.getState());
             hotel.setCountry(request.getCountry());
             hotel.setZipCode(request.getZipCode());
-            hotel.setTotalRooms(request.getTotalRooms());
-            hotel.setCurrency(request.getCurrency());
+            hotel.setLogoUrl(request.getLogoUrl());
+            if (request.getLogo() != null) {
+                hotel.setLogo(request.getLogo());
+            }
+            hotel.setStarRatingCategory(request.getStarRatingCategory());
+            hotel.setTagline(request.getTagline());
+            hotel.setReceptionDeskPhone(request.getReceptionDeskPhone());
+            hotel.setWebsiteUrl(request.getWebsiteUrl());
+            hotel.setGstin(request.getGstin());
+            hotel.setFssaiNo(request.getFssaiNo());
+            hotel.setCheckInTime(request.getCheckInTime());
+            hotel.setCheckOutTime(request.getCheckOutTime());
+            if (request.getTotalRooms() != null) {
+                hotel.setTotalRooms(request.getTotalRooms());
+            }
+            if (request.getCurrency() != null) {
+                hotel.setCurrency(request.getCurrency());
+            }
             hotel.setUpdatedAt(LocalDateTime.now());
             
             Hotel updated = repository.save(hotel);
@@ -143,6 +171,10 @@ public class HotelServiceImpl implements HotelService {
     }
 
     private HotelResponse mapToResponse(Hotel hotel) {
+        long roomCount = 0;
+        if (hotel.getId() != null) {
+            roomCount = roomRepository.countByHotelId(hotel.getId());
+        }
         return HotelResponse.builder()
                 .id(hotel.getId())
                 .name(hotel.getName())
@@ -153,7 +185,17 @@ public class HotelServiceImpl implements HotelService {
                 .state(hotel.getState())
                 .country(hotel.getCountry())
                 .zipCode(hotel.getZipCode())
-                .totalRooms(hotel.getTotalRooms())
+                .logoUrl(hotel.getLogoUrl())
+                .logo(hotel.getLogo())
+                .starRatingCategory(hotel.getStarRatingCategory())
+                .tagline(hotel.getTagline())
+                .receptionDeskPhone(hotel.getReceptionDeskPhone())
+                .websiteUrl(hotel.getWebsiteUrl())
+                .gstin(hotel.getGstin())
+                .fssaiNo(hotel.getFssaiNo())
+                .checkInTime(hotel.getCheckInTime())
+                .checkOutTime(hotel.getCheckOutTime())
+                .totalRooms((int) roomCount)
                 .currency(hotel.getCurrency())
                 .createdAt(hotel.getCreatedAt())
                 .updatedAt(hotel.getUpdatedAt())

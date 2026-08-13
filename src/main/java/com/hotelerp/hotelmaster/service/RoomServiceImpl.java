@@ -1,15 +1,18 @@
 package com.hotelerp.hotelmaster.service;
 
 import com.hotelerp.hotelmaster.common.StandardResponse;
+import com.hotelerp.hotelmaster.dto.RoomPhotoDTO;
 import com.hotelerp.hotelmaster.dto.RoomRequest;
 import com.hotelerp.hotelmaster.dto.RoomResponse;
 import com.hotelerp.hotelmaster.entity.Booking;
 import com.hotelerp.hotelmaster.entity.Floor;
 import com.hotelerp.hotelmaster.entity.Guest;
 import com.hotelerp.hotelmaster.entity.Room;
+import com.hotelerp.hotelmaster.entity.RoomPhoto;
 import com.hotelerp.hotelmaster.entity.RoomType;
 import com.hotelerp.hotelmaster.repository.BookingRepository;
 import com.hotelerp.hotelmaster.repository.FloorRepository;
+import com.hotelerp.hotelmaster.repository.RoomPhotoRepository;
 import com.hotelerp.hotelmaster.repository.RoomRepository;
 import com.hotelerp.hotelmaster.repository.RoomTypeRepository;
 import com.hotelerp.hotelmaster.repository.CommonMasterRepository;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,6 +41,7 @@ public class RoomServiceImpl implements RoomService {
     private final RoomTypeRepository roomTypeRepository;
     private final CommonMasterRepository commonMasterRepository;
     private final BookingRepository bookingRepository;
+    private final RoomPhotoRepository roomPhotoRepository;
 
     @Override
     @Transactional
@@ -77,6 +82,7 @@ public class RoomServiceImpl implements RoomService {
                     .build();
             
             Room saved = repository.save(room);
+            saveRoomPhotos(saved, request);
             return StandardResponse.success(mapToResponse(saved), "Room created successfully");
         } catch (Exception e) {
             log.error("Error creating room: ", e);
@@ -126,6 +132,13 @@ public class RoomServiceImpl implements RoomService {
             room.setUpdatedAt(LocalDateTime.now());
             
             Room updated = repository.save(room);
+
+            if ((request.getPhotos() != null && !request.getPhotos().isEmpty()) ||
+                (request.getPhotoDataList() != null && !request.getPhotoDataList().isEmpty())) {
+                roomPhotoRepository.deleteByRoomId(updated.getId());
+                saveRoomPhotos(updated, request);
+            }
+
             return StandardResponse.success(mapToResponse(updated), "Room updated successfully");
         } catch (Exception e) {
             log.error("Error updating room: ", e);
@@ -195,7 +208,46 @@ public class RoomServiceImpl implements RoomService {
         }
     }
 
+    private void saveRoomPhotos(Room room, RoomRequest request) {
+        if (request.getPhotos() != null && !request.getPhotos().isEmpty()) {
+            for (RoomPhotoDTO photoDto : request.getPhotos()) {
+                if (photoDto.getPhotoData() != null && photoDto.getPhotoData().length > 0) {
+                    RoomPhoto photo = RoomPhoto.builder()
+                            .room(room)
+                            .fileName(photoDto.getFileName())
+                            .fileType(photoDto.getFileType())
+                            .photoData(photoDto.getPhotoData())
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    roomPhotoRepository.save(photo);
+                }
+            }
+        }
+        if (request.getPhotoDataList() != null && !request.getPhotoDataList().isEmpty()) {
+            for (byte[] photoData : request.getPhotoDataList()) {
+                if (photoData != null && photoData.length > 0) {
+                    RoomPhoto photo = RoomPhoto.builder()
+                            .room(room)
+                            .photoData(photoData)
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    roomPhotoRepository.save(photo);
+                }
+            }
+        }
+    }
+
     private RoomResponse mapToResponse(Room room) {
+        List<RoomPhoto> photoEntities = roomPhotoRepository.findByRoomId(room.getId());
+        List<RoomPhotoDTO> photoDTOs = photoEntities.stream()
+                .map(photo -> RoomPhotoDTO.builder()
+                        .id(photo.getId())
+                        .fileName(photo.getFileName())
+                        .fileType(photo.getFileType())
+                        .photoData(photo.getPhotoData())
+                        .build())
+                .collect(Collectors.toList());
+
         return RoomResponse.builder()
                 .id(room.getId())
                 .roomNumber(room.getRoomNumber())
@@ -212,6 +264,7 @@ public class RoomServiceImpl implements RoomService {
                 .createdAt(room.getCreatedAt())
                 .updatedAt(room.getUpdatedAt())
                 .isActive(room.getIsActive())
+                .photos(photoDTOs)
                 .build();
     }
 

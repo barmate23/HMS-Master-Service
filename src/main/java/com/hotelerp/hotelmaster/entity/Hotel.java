@@ -47,6 +47,37 @@
         @Column(name = "zipCode", nullable = false, length = 10)
         private String zipCode;
 
+        @Column(name = "logoUrl", columnDefinition = "TEXT")
+        private String logoUrl;
+
+        @Lob
+        @Column(name = "logo", columnDefinition = "LONGBLOB")
+        private byte[] logo;
+
+        @Column(name = "starRatingCategory", length = 100)
+        private String starRatingCategory;
+
+        @Column(name = "tagline", length = 255)
+        private String tagline;
+
+        @Column(name = "receptionDeskPhone", length = 50)
+        private String receptionDeskPhone;
+
+        @Column(name = "websiteUrl", length = 255)
+        private String websiteUrl;
+
+        @Column(name = "gstin", length = 50)
+        private String gstin;
+
+        @Column(name = "fssaiNo", length = 50)
+        private String fssaiNo;
+
+        @Column(name = "checkInTime", length = 20)
+        private String checkInTime;
+
+        @Column(name = "checkOutTime", length = 20)
+        private String checkOutTime;
+
         @Column(name = "totalRooms", nullable = false)
         private Integer totalRooms;
 

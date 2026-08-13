@@ -22,4 +22,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("floorId") Long floorId, 
             @Param("roomTypeId") Long roomTypeId, 
             Pageable pageable);
+
+    @Query("SELECT COUNT(r) FROM Room r WHERE (r.floor.hotel.id = :hotelId OR r.roomType.hotel.id = :hotelId) AND (r.isDeleted = false OR r.isDeleted IS NULL)")
+    long countByHotelId(@Param("hotelId") Long hotelId);
 }

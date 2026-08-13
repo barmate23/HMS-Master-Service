@@ -1,6 +1,7 @@
 package com.hotelerp.hotelmaster.dto;
 
 import lombok.*;
+import java.util.List;
 
 @Data
 @Builder
@@ -14,4 +15,6 @@ public class RoomRequest {
     private Long hkStatusId;
     private Integer maxOccupancy;
     private String telephone;
+    private List<RoomPhotoDTO> photos;
+    private List<byte[]> photoDataList;
 }
