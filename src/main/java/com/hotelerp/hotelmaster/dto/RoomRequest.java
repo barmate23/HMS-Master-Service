@@ -16,5 +16,4 @@ public class RoomRequest {
     private Integer maxOccupancy;
     private String telephone;
     private List<RoomPhotoDTO> photos;
-    private List<byte[]> photoDataList;
 }

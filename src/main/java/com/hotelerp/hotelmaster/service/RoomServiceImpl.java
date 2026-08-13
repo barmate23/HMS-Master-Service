@@ -133,8 +133,7 @@ public class RoomServiceImpl implements RoomService {
             
             Room updated = repository.save(room);
 
-            if ((request.getPhotos() != null && !request.getPhotos().isEmpty()) ||
-                (request.getPhotoDataList() != null && !request.getPhotoDataList().isEmpty())) {
+            if (request.getPhotos() != null && !request.getPhotos().isEmpty()) {
                 roomPhotoRepository.deleteByRoomId(updated.getId());
                 saveRoomPhotos(updated, request);
             }
@@ -217,18 +216,6 @@ public class RoomServiceImpl implements RoomService {
                             .fileName(photoDto.getFileName())
                             .fileType(photoDto.getFileType())
                             .photoData(photoDto.getPhotoData())
-                            .createdAt(LocalDateTime.now())
-                            .build();
-                    roomPhotoRepository.save(photo);
-                }
-            }
-        }
-        if (request.getPhotoDataList() != null && !request.getPhotoDataList().isEmpty()) {
-            for (byte[] photoData : request.getPhotoDataList()) {
-                if (photoData != null && photoData.length > 0) {
-                    RoomPhoto photo = RoomPhoto.builder()
-                            .room(room)
-                            .photoData(photoData)
                             .createdAt(LocalDateTime.now())
                             .build();
                     roomPhotoRepository.save(photo);
