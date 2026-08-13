@@ -224,16 +224,19 @@ public class RoomServiceImpl implements RoomService {
         }
     }
 
-    private RoomResponse mapToResponse(Room room) {
-        List<RoomPhoto> photoEntities = roomPhotoRepository.findByRoomId(room.getId());
-        List<RoomPhotoDTO> photoDTOs = photoEntities.stream()
-                .map(photo -> RoomPhotoDTO.builder()
-                        .id(photo.getId())
-                        .fileName(photo.getFileName())
-                        .fileType(photo.getFileType())
-                        .photoData(photo.getPhotoData())
-                        .build())
-                .collect(Collectors.toList());
+    private RoomResponse mapToResponse(Room room, boolean includePhotos) {
+        List<RoomPhotoDTO> photoDTOs = null;
+        if (includePhotos) {
+            List<RoomPhoto> photoEntities = roomPhotoRepository.findByRoomId(room.getId());
+            photoDTOs = photoEntities.stream()
+                    .map(photo -> RoomPhotoDTO.builder()
+                            .id(photo.getId())
+                            .fileName(photo.getFileName())
+                            .fileType(photo.getFileType())
+                            .photoData(photo.getPhotoData())
+                            .build())
+                    .collect(Collectors.toList());
+        }
 
         return RoomResponse.builder()
                 .id(room.getId())
@@ -255,8 +258,12 @@ public class RoomServiceImpl implements RoomService {
                 .build();
     }
 
+    private RoomResponse mapToResponse(Room room) {
+        return mapToResponse(room, true);
+    }
+
     private RoomResponse mapToResponseWithGuest(Room room) {
-        RoomResponse response = mapToResponse(room);
+        RoomResponse response = mapToResponse(room, false);
         List<Booking> bookings = bookingRepository.findActiveBookingByRoomId(room.getId());
         if(!bookings.isEmpty()){
             Guest guest = bookings.get(0).getReservation().getGuest();
