@@ -6,6 +6,7 @@ import com.hotelerp.hotelmaster.dto.FloorResponse;
 import com.hotelerp.hotelmaster.entity.Floor;
 import com.hotelerp.hotelmaster.entity.Hotel;
 import com.hotelerp.hotelmaster.repository.FloorRepository;
+import com.hotelerp.hotelmaster.config.LoginUser;
 import com.hotelerp.hotelmaster.repository.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,15 +28,22 @@ public class FloorServiceImpl implements FloorService {
 
     private final FloorRepository repository;
     private final HotelRepository hotelRepository;
+    private final LoginUser loginUser;
 
     @Override
     @Transactional
     public StandardResponse<?> createFloor(FloorRequest request) {
         log.info("Request received to create floor: {}", request.getFloorNumber());
         try {
-            Optional<Hotel> hotelOpt = hotelRepository.findById(request.getHotelId());
+            Long hotelId = (loginUser != null) ? loginUser.getHotelId() : null;
+
+            if (hotelId == null) {
+                return StandardResponse.error("Hotel not found. Please create a hotel first before creating a floor", "HOTEL_NOT_FOUND", "hotelId", "Hotel ID is missing in token");
+            }
+
+            Optional<Hotel> hotelOpt = hotelRepository.findById(hotelId);
             if (hotelOpt.isEmpty()) {
-                return StandardResponse.error("Hotel not found", "NOT_FOUND", "hotelId", null);
+                return StandardResponse.error("Hotel not found. Please create a hotel first before creating a floor", "HOTEL_NOT_FOUND", "hotelId", "No hotel exists for ID: " + hotelId);
             }
 
             Floor floor = Floor.builder()
@@ -105,11 +113,12 @@ public class FloorServiceImpl implements FloorService {
     @Override
     @Transactional(readOnly = true)
     public StandardResponse<?> getAllFloors(String searchText, Long hotelId, int page, int size) {
+        Long targetHotelId = (loginUser != null) ? loginUser.getHotelId() : hotelId;
         log.info("Fetching all floors with searchText: {}, hotelId: {}, page: {}, size: {}", 
-                searchText, hotelId, page, size);
+                searchText, targetHotelId, page, size);
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<Floor> floorPage = repository.searchFloors(searchText, hotelId, pageable);
+            Page<Floor> floorPage = repository.searchFloors(searchText, targetHotelId, pageable);
             
             List<FloorResponse> responses = floorPage.getContent().stream()
                     .map(this::mapToResponse)
