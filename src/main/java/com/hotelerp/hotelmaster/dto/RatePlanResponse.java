@@ -15,6 +15,8 @@ public class RatePlanResponse {
     private BigDecimal priceAdjustment;
     private Integer displayOrder;
     private Boolean isActive;
+    private Long hotelId;
+    private String hotelName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
     @Query("SELECT r FROM Room r WHERE " +
+            "(:hotelId IS NULL OR r.floor.hotel.id = :hotelId) AND " +
             "(:searchText IS NULL OR r.roomNumber LIKE %:searchText% OR r.floor.floorNumber LIKE %:searchText% OR r.roomType.name LIKE %:searchText%) AND " +
             "(:statusId IS NULL OR r.status.id = :statusId) AND " +
             "(:floorId IS NULL OR r.floor.id = :floorId) AND " +
@@ -21,6 +22,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("statusId") Long statusId, 
             @Param("floorId") Long floorId, 
             @Param("roomTypeId") Long roomTypeId, 
+            @Param("hotelId") Long hotelId,
             Pageable pageable);
 
     @Query("SELECT COUNT(r) FROM Room r WHERE (r.floor.hotel.id = :hotelId OR r.roomType.hotel.id = :hotelId) AND (r.isDeleted = false OR r.isDeleted IS NULL)")

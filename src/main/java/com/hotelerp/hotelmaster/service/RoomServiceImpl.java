@@ -17,6 +17,9 @@ import com.hotelerp.hotelmaster.repository.RoomRepository;
 import com.hotelerp.hotelmaster.repository.RoomTypeRepository;
 import com.hotelerp.hotelmaster.repository.CommonMasterRepository;
 import com.hotelerp.hotelmaster.entity.CommonMaster;
+import com.hotelerp.hotelmaster.entity.Hotel;
+import com.hotelerp.hotelmaster.repository.HotelRepository;
+import com.hotelerp.hotelmaster.config.LoginUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -42,20 +45,39 @@ public class RoomServiceImpl implements RoomService {
     private final CommonMasterRepository commonMasterRepository;
     private final BookingRepository bookingRepository;
     private final RoomPhotoRepository roomPhotoRepository;
+    private final HotelRepository hotelRepository;
+    private final LoginUser loginUser;
 
     @Override
     @Transactional
     public StandardResponse<?> createRoom(RoomRequest request) {
         log.info("Request received to create room: {}", request.getRoomNumber());
         try {
+            Long hotelId = (loginUser != null) ? loginUser.getHotelId() : null;
+
+            if (hotelId == null) {
+                return StandardResponse.error("Hotel not found. Please create a hotel first before creating a room", "HOTEL_NOT_FOUND", "hotelId", "Hotel ID is missing in token");
+            }
+
+            Optional<Hotel> hotelOpt = hotelRepository.findById(hotelId);
+            if (hotelOpt.isEmpty()) {
+                return StandardResponse.error("Hotel not found. Please create a hotel first before creating a room", "HOTEL_NOT_FOUND", "hotelId", "No hotel exists for ID: " + hotelId);
+            }
+
             Optional<Floor> floorOpt = floorRepository.findById(request.getFloorId());
             if (floorOpt.isEmpty()) {
                 return StandardResponse.error("Floor not found", "NOT_FOUND", "floorId", null);
+            }
+            if (!floorOpt.get().getHotel().getId().equals(hotelId)) {
+                return StandardResponse.error("Floor does not belong to the correct hotel", "INVALID_FLOOR", "floorId", null);
             }
 
             Optional<RoomType> typeOpt = roomTypeRepository.findById(request.getRoomTypeId());
             if (typeOpt.isEmpty()) {
                 return StandardResponse.error("Room Type not found", "NOT_FOUND", "roomTypeId", null);
+            }
+            if (!typeOpt.get().getHotel().getId().equals(hotelId)) {
+                return StandardResponse.error("Room Type does not belong to the correct hotel", "INVALID_ROOM_TYPE", "roomTypeId", null);
             }
 
             CommonMaster status = null;
@@ -162,11 +184,12 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional(readOnly = true)
     public StandardResponse<?> getAllRooms(String searchText, Long statusId, Long floorId, Long roomTypeId, int page, int size) {
-        log.info("Fetching all rooms with filters - searchText: {}, statusId: {}, floorId: {}, roomTypeId: {}, page: {}, size: {}", 
-                searchText, statusId, floorId, roomTypeId, page, size);
+        Long hotelId = (loginUser != null) ? loginUser.getHotelId() : null;
+        log.info("Fetching all rooms with filters - searchText: {}, statusId: {}, floorId: {}, roomTypeId: {}, hotelId: {}, page: {}, size: {}", 
+                searchText, statusId, floorId, roomTypeId, hotelId, page, size);
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<Room> roomPage = repository.searchRooms(searchText, statusId, floorId, roomTypeId, pageable);
+            Page<Room> roomPage = repository.searchRooms(searchText, statusId, floorId, roomTypeId, hotelId, pageable);
             
             List<RoomResponse> responses = roomPage.getContent().stream()
                     .map(this::mapToResponseWithGuest)

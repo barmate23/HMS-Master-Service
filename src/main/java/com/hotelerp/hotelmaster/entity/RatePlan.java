@@ -41,6 +41,10 @@ public class RatePlan {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id")
+    private Hotel hotel;
+
     // Audit fields
     @Column(name = "created_at")
     private LocalDateTime createdAt;

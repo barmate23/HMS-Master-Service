@@ -4,6 +4,9 @@ import com.hotelerp.hotelmaster.common.StandardResponse;
 import com.hotelerp.hotelmaster.dto.RatePlanRequest;
 import com.hotelerp.hotelmaster.dto.RatePlanResponse;
 import com.hotelerp.hotelmaster.entity.RatePlan;
+import com.hotelerp.hotelmaster.config.LoginUser;
+import com.hotelerp.hotelmaster.entity.Hotel;
+import com.hotelerp.hotelmaster.repository.HotelRepository;
 import com.hotelerp.hotelmaster.repository.RatePlanRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,13 +27,27 @@ import java.util.stream.Collectors;
 public class RatePlanServiceImpl implements RatePlanService {
 
     private final RatePlanRepository repository;
+    private final HotelRepository hotelRepository;
+    private final LoginUser loginUser;
 
     @Override
     @Transactional
     public StandardResponse<?> createRatePlan(RatePlanRequest request) {
         log.info("Request to create rate plan: {}", request.getName());
         try {
+            Long hotelId = (loginUser != null) ? loginUser.getHotelId() : null;
+
+            if (hotelId == null) {
+                return StandardResponse.error("Hotel not found. Please create a hotel first before creating a rate plan", "HOTEL_NOT_FOUND", "hotelId", "Hotel ID is missing in token");
+            }
+
+            Optional<Hotel> hotelOpt = hotelRepository.findById(hotelId);
+            if (hotelOpt.isEmpty()) {
+                return StandardResponse.error("Hotel not found. Please create a hotel first before creating a rate plan", "HOTEL_NOT_FOUND", "hotelId", "No hotel exists for ID: " + hotelId);
+            }
+
             RatePlan ratePlan = RatePlan.builder()
+                    .hotel(hotelOpt.get())
                     .name(request.getName())
                     .description(request.getDescription())
                     .priceAdjustment(request.getPriceAdjustment())
@@ -89,10 +106,11 @@ public class RatePlanServiceImpl implements RatePlanService {
     @Override
     @Transactional(readOnly = true)
     public StandardResponse<?> getAllRatePlans(String searchText, int page, int size) {
-        log.info("Fetching all rate plans with searchText: {}, page: {}, size: {}", searchText, page, size);
+        Long hotelId = (loginUser != null) ? loginUser.getHotelId() : null;
+        log.info("Fetching all rate plans with searchText: {}, hotelId: {}, page: {}, size: {}", searchText, hotelId, page, size);
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<RatePlan> ratePlanPage = repository.searchRatePlans(searchText, pageable);
+            Page<RatePlan> ratePlanPage = repository.searchRatePlans(searchText, hotelId, pageable);
 
             List<RatePlanResponse> responses = ratePlanPage.getContent().stream()
                     .map(this::mapToResponse)
@@ -140,6 +158,8 @@ public class RatePlanServiceImpl implements RatePlanService {
                 .priceAdjustment(rp.getPriceAdjustment())
                 .displayOrder(rp.getDisplayOrder())
                 .isActive(rp.getIsActive())
+                .hotelId(rp.getHotel() != null ? rp.getHotel().getId() : null)
+                .hotelName(rp.getHotel() != null ? rp.getHotel().getName() : null)
                 .createdAt(rp.getCreatedAt())
                 .updatedAt(rp.getUpdatedAt())
                 .build();

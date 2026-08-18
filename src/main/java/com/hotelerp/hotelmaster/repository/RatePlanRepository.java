@@ -12,7 +12,11 @@ import org.springframework.stereotype.Repository;
 public interface RatePlanRepository extends JpaRepository<RatePlan, Long> {
 
     @Query("SELECT rp FROM RatePlan rp WHERE " +
+            "(:hotelId IS NULL OR rp.hotel.id = :hotelId) AND " +
             "(:searchText IS NULL OR rp.name LIKE %:searchText%) AND " +
             "rp.isActive = true")
-    Page<RatePlan> searchRatePlans(@Param("searchText") String searchText, Pageable pageable);
+    Page<RatePlan> searchRatePlans(
+            @Param("searchText") String searchText, 
+            @Param("hotelId") Long hotelId, 
+            Pageable pageable);
 }

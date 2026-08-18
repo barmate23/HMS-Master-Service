@@ -14,5 +14,4 @@ public class RoomTypeRequest {
     private BigDecimal basePricePerNight;
     private BigDecimal area;
     private String description;
-    private String imageUrl;
 }

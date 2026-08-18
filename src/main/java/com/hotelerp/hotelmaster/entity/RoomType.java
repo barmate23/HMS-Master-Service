@@ -41,9 +41,7 @@ public class RoomType {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
     
-    @Column(name = "imageUrl", length = 500)
-    private String imageUrl;
-    
+
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     

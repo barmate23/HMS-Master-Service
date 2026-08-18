@@ -53,7 +53,6 @@ public class RoomTypeServiceImpl implements RoomTypeService {
                     .basePricePerNight(request.getBasePricePerNight())
                     .area(request.getArea())
                     .description(request.getDescription())
-                    .imageUrl(request.getImageUrl())
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .isActive(true)
@@ -93,7 +92,6 @@ public class RoomTypeServiceImpl implements RoomTypeService {
             roomType.setBasePricePerNight(request.getBasePricePerNight());
             roomType.setArea(request.getArea());
             roomType.setDescription(request.getDescription());
-            roomType.setImageUrl(request.getImageUrl());
             roomType.setUpdatedAt(LocalDateTime.now());
             
             RoomType updated = repository.save(roomType);
@@ -176,7 +174,6 @@ public class RoomTypeServiceImpl implements RoomTypeService {
                 .basePricePerNight(rt.getBasePricePerNight())
                 .area(rt.getArea())
                 .description(rt.getDescription())
-                .imageUrl(rt.getImageUrl())
                 .createdAt(rt.getCreatedAt())
                 .updatedAt(rt.getUpdatedAt())
                 .isActive(rt.getIsActive())
