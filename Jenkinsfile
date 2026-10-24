@@ -5,8 +5,8 @@ pipeline {
         IMAGE_NAME = "masterservice"
         CONTAINER_NAME = "masterservice"
         DOCKER_NETWORK = "updated_orgadmin_rmscadminnetwork"
-        HOST_PORT = "9012"
-        CONTAINER_PORT = "9012"
+        HOST_PORT = "7004"
+        CONTAINER_PORT = "7004"
         DOCKER_BUILDKIT = "0"
     }
 
@@ -62,9 +62,9 @@ pipeline {
                         -e EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS=10 \
                         -e EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS=30 \
                         -e MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,eureka,shutdown \
-                        -e SPRING_DATASOURCE_URL='jdbc:mysql://erp-mysql:3306/hms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC' \
+                        -e SPRING_DATASOURCE_URL='jdbc:mysql://mysql:3306/hms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC' \
                         -e SPRING_DATASOURCE_USERNAME=root \
-                        -e SPRING_DATASOURCE_PASSWORD=root \
+                        -e SPRING_DATASOURCE_PASSWORD=Helixion2026 \
                         -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
                         ${IMAGE_NAME}:latest
                 """
